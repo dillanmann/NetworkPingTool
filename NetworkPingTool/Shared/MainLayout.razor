@@ -1,0 +1,20 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>NetworkPingTool</PageTitle>
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <NavMenu />
+    <MudMainContent Style="height: 100%; margin: 0 !important;">
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mb-4 mt-4" Style="height: 100%; margin: 0 !important;">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    Theme theme = new Theme();
+}

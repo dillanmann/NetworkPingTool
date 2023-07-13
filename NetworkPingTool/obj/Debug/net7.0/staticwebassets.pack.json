@@ -1,0 +1,33 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\Dev\\CS\\NetworkPingTool\\NetworkPingTool\\obj\\Debug\\net7.0\\scopedcss\\projectbundle\\NetworkPingTool.bundle.scp.css",
+      "PackagePath": "staticwebassets\\NetworkPingTool.bundle.scp.css"
+    },
+    {
+      "Id": "D:\\Dev\\CS\\NetworkPingTool\\NetworkPingTool\\wwwroot\\css\\site.css",
+      "PackagePath": "staticwebassets\\css\\site.css"
+    },
+    {
+      "Id": "D:\\Dev\\CS\\NetworkPingTool\\NetworkPingTool\\wwwroot\\favicon.png",
+      "PackagePath": "staticwebassets\\favicon.png"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.NetworkPingTool.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.build.NetworkPingTool.props",
+      "PackagePath": "build\\NetworkPingTool.props"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.buildMultiTargeting.NetworkPingTool.props",
+      "PackagePath": "buildMultiTargeting\\NetworkPingTool.props"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.buildTransitive.NetworkPingTool.props",
+      "PackagePath": "buildTransitive\\NetworkPingTool.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

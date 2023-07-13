@@ -1,0 +1,44 @@
+﻿@page "/"
+@using NetworkPingTool.Shared.Components
+@using NetworkPingTool.ViewModels;
+
+@inject IndexViewModel viewModel;
+
+<PageTitle>Index</PageTitle>
+
+<div>
+    <MudGrid>
+        <MudItem xs="12" Class="mt-4">
+            <MudText Typo="Typo.h6" Color="Color.Primary">Ping IP Addresses</MudText>
+        </MudItem>
+        <MudItem xs="12">
+            <PingingIpAddressHeader />
+        </MudItem>
+        @foreach(var pingingAddress in viewModel.IpAddresses)
+        {
+            <MudItem xs="12">
+                <PingingIpAddress
+                    IpAddress="@pingingAddress.IpAddress"
+                    IsActive="@pingingAddress.IsActive"
+                    MinRoundTripTime="@pingingAddress.MinRoundTripTime"
+                    MaxRoundTripTime="@pingingAddress.MaxRoundTripTime"
+                    AverageRoundTripTime="@pingingAddress.AverageRoundTripTime"
+                    TotalPings="@pingingAddress.TotalPings"
+                    OnPlayClicked="() => viewModel.StartPingingAddress(pingingAddress)"
+                    OnStopClicked="() => viewModel.StopPingingAddress(pingingAddress)"
+                    OnDeleteClicked="() => viewModel.DeleteIpAddress(pingingAddress)" />
+            </MudItem>
+        }
+    </MudGrid>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await viewModel.OnInitializedAsync();
+        viewModel.NotifyStateChange += OnNotify;
+    }
+
+    public async Task OnNotify() => await InvokeAsync(StateHasChanged);
+
+}
