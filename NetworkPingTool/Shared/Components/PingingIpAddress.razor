@@ -2,30 +2,33 @@
 
 <div>
     <MudGrid Class="d-flex align-center">
-        <MudItem xs="6">
+        <MudItem xs="5">
             <MudText>@IpAddress</MudText>
         </MudItem>
-        <MudItem xs="1">
+        <MudItem xs="1" Class="d-flex justify-center">
             <MudText>@MinRoundTripTime</MudText>
         </MudItem>
-        <MudItem xs="1">
+        <MudItem xs="1" Class="d-flex justify-center">
             <MudText>@MaxRoundTripTime</MudText>
         </MudItem>
-        <MudItem xs="1">
+        <MudItem xs="1" Class="d-flex justify-center">
             <MudText>@AverageRoundTripTime</MudText>
         </MudItem>
-         <MudItem xs="1">
+        <MudItem xs="1" Class="d-flex justify-center">
             <MudText>@TotalPings</MudText>
         </MudItem>
-        <MudItem xs="1">
+        <MudItem xs="1" Class="d-flex justify-center">
+            <MudText>@TotalFailures</MudText>
+        </MudItem>
+        <MudItem xs="1" Class="d-flex justify-center">
             <MudIconButton Icon="@(IsActive ? Icons.Material.Filled.Stop : Icons.Material.Filled.PlayArrow)" OnClick="@InvokeButtonClick" Color="Color.Primary" />
         </MudItem>
-        <MudItem xs="1">
+        <MudItem xs="1" Class="d-flex justify-center">
             <MudIconButton
             Icon="@Icons.Material.Filled.Delete"
             Disabled="@IsActive"
             OnClick="async () => await OnDeleteClicked.InvokeAsync()"
-            Color="Color.Primary"/>
+            Color="Color.Error" />
         </MudItem>
     </MudGrid>
 </div>
@@ -48,6 +51,9 @@
 
     [Parameter]
     public long TotalPings { get; set; }
+
+    [Parameter]
+    public long TotalFailures { get; set; }
 
     [Parameter]
     public EventCallback OnPlayClicked { get; set; }

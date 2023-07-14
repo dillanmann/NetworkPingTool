@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using NetworkPingTool.Shared.Components
+@using NetworkPingTool.Shared.Validators;
 @using NetworkPingTool.ViewModels;
 
 @inject IndexViewModel viewModel;
@@ -12,7 +13,8 @@
             <MudText Typo="Typo.h6" Color="Color.Primary">Ping IP Addresses</MudText>
         </MudItem>
         <MudItem xs="12">
-            <PingingIpAddressHeader />
+            <PingingIpAddressHeader CanDeleteAll="@viewModel.CanDeleteAllPingingAddresses" CanStopAll="@viewModel.CanStopAllPingingAddresses"
+                                    OnDeleteAllClicked="viewModel.DeleteAllPingingAddresses" OnStopAllClicked="viewModel.StopPingingAllAddresses" />
         </MudItem>
         @foreach(var pingingAddress in viewModel.IpAddresses)
         {
@@ -24,11 +26,19 @@
                     MaxRoundTripTime="@pingingAddress.MaxRoundTripTime"
                     AverageRoundTripTime="@pingingAddress.AverageRoundTripTime"
                     TotalPings="@pingingAddress.TotalPings"
-                    OnPlayClicked="() => viewModel.StartPingingAddress(pingingAddress)"
-                    OnStopClicked="() => viewModel.StopPingingAddress(pingingAddress)"
-                    OnDeleteClicked="() => viewModel.DeleteIpAddress(pingingAddress)" />
+                    TotalFailures="@pingingAddress.TotalFailures"
+                    OnPlayClicked="async () => await viewModel.StartPingingAddress(pingingAddress)"
+                    OnStopClicked="async () => await viewModel.StopPingingAddress(pingingAddress)"
+                    OnDeleteClicked="async () => await viewModel.DeleteIpAddress(pingingAddress)" />
             </MudItem>
         }
+        <MudItem xs="11" Class="d-flex align-center">
+            <MudTextField @bind-Text="viewModel.NewAddressToAdd" T="string" Placeholder="New IP Address" Variant="Variant.Outlined"
+            Validation="IpAddressValidator.Validate" DebounceInterval="500"/>
+        </MudItem>
+        <MudItem xs="1" Class="d-flex align-center">
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="@(!viewModel.CanAddNewIpAddress)" OnClick="@viewModel.AddNewIpAddress">Add new IP</MudButton>
+        </MudItem>
     </MudGrid>
 </div>
 
@@ -40,5 +50,4 @@
     }
 
     public async Task OnNotify() => await InvokeAsync(StateHasChanged);
-
 }

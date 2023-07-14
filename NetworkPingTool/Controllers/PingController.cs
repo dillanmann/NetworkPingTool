@@ -53,7 +53,31 @@ namespace NetworkPingTool.Controllers
         }
 
         [HttpPost]
-        public IActionResult StopPingingAddresses()
+        [Route("stop")]
+        public IActionResult StopPingingAddresses([FromBody] StopPingingAddressesRequest request)
+        {
+            var parsedAddresses = request.IpAddresses.Select(ip =>
+            {
+                if (IPAddress.TryParse(ip, out var address))
+                {
+                    return address;
+                }
+
+                return null;
+            });
+
+            if (parsedAddresses.Any(ipaddr => ipaddr == null))
+            {
+                return BadRequest($"One or more addresses not valid");
+            }
+
+            pingAddressService.StopPingingAddresses(parsedAddresses);
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("stopAll")]
+        public IActionResult StopPingingAllAddresses([FromBody] StopPingingAllAddressesRequest request)
         {
             pingAddressService.StopPingingAllAddresses();
             return Ok();

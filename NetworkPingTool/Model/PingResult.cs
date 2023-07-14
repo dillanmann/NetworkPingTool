@@ -2,5 +2,14 @@
 
 namespace NetworkPingTool.Model
 {
-    public record PingResult(string IpAddress, IPStatus Status, long RoundtripTime);
+    public record PingResult
+    {
+        public string IpAddress { get; init; }
+
+        public IPStatus Status { get; init; }
+
+        public long RoundtripTime { get; init; }
+
+        public bool Success { get => Status == IPStatus.Success; }
+    }
 }

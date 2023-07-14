@@ -9,10 +9,9 @@ namespace NetworkPingTool.Services
 {
     public class PingAddressService : IPingAddressService
     {
-        private readonly List<Task> activeTasks = new();
+        private readonly Dictionary<string, RunningPingTask> activeTasks = new();
         private readonly IHubContext<PingResultHub> pingResultHub;
         private const int pingIntervalMillis = 500;
-        private CancellationTokenSource pingTaskCancellationToken;
 
         public PingAddressService(IHubContext<PingResultHub> pingResultHub)
         {
@@ -21,26 +20,45 @@ namespace NetworkPingTool.Services
 
         public void StartPingingAddresses(IEnumerable<IPAddress> addresses)
         {
-            EnsureCancellationTokenActive();
-
             foreach (var address in addresses)
             {
-                activeTasks.Add(NewPingAddressTask(address));
+                var tokenSource = new CancellationTokenSource();
+                activeTasks.Add(address.ToString(), new RunningPingTask(NewPingAddressTask(address, tokenSource.Token), tokenSource));
             }
         }
 
         public void StartPingingAddress(IPAddress address)
         {
-            EnsureCancellationTokenActive();
-
-            activeTasks.Add(NewPingAddressTask(address));
+            var tokenSource = new CancellationTokenSource();
+            activeTasks.Add(address.ToString(), new RunningPingTask(NewPingAddressTask(address, tokenSource.Token), tokenSource));
         }
 
         public void StopPingingAllAddresses()
         {
-            if (activeTasks.Any())
+            foreach (var pair in activeTasks)
             {
-                pingTaskCancellationToken.Cancel();
+                var runningTask = pair.Value;
+                if (runningTask.CancellationTokenSource.IsCancellationRequested) continue;
+                runningTask.CancellationTokenSource.Cancel();
+            }
+            activeTasks.Clear();
+        }
+
+        public void StopPingingAddresses(IEnumerable<IPAddress> addresses)
+        {
+            var tasksToRemove = new List<string>();
+            foreach (var pair in activeTasks
+                .Where(t => addresses.Select(a => a.ToString()).Contains(t.Key)))
+            {
+                var runningTask = pair.Value;
+                if (runningTask.CancellationTokenSource.IsCancellationRequested) continue;
+                runningTask.CancellationTokenSource.Cancel();
+                tasksToRemove.Add(pair.Key);
+            }
+
+            foreach (var taskToRemove in tasksToRemove)
+            {
+                activeTasks.Remove(taskToRemove);
             }
         }
 
@@ -48,28 +66,46 @@ namespace NetworkPingTool.Services
         {
             var pingSender = new Ping();
             var result = await pingSender.SendPingAsync(address);
-            await pingResultHub.Clients.All.SendAsync(PingResultHub.PingResultMessageMethodName, JsonSerializer.Serialize(NewPingResult(result)), token);
+            if (token.IsCancellationRequested) return;
+
+            await pingResultHub.Clients.All.SendAsync(
+                PingResultHub.PingResultMessageMethodName, JsonSerializer.Serialize(NewPingResult(result, address)), token);
+
 
             using (var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(pingIntervalMillis)))
             {
                 while (await timer.WaitForNextTickAsync(token))
                 {
+                    if (token.IsCancellationRequested) return;
                     result = await pingSender.SendPingAsync(address);
-                    await pingResultHub.Clients.All.SendAsync(PingResultHub.PingResultMessageMethodName, JsonSerializer.Serialize(NewPingResult(result)), token);
+
+                    await pingResultHub.Clients.All.SendAsync(
+                        PingResultHub.PingResultMessageMethodName, JsonSerializer.Serialize(NewPingResult(result, address)), token);
                 }
             }
         }
 
-        private void EnsureCancellationTokenActive()
-        {
-            if (!activeTasks.Any())
+        private Task NewPingAddressTask(IPAddress address, CancellationToken token)
+            => Task.Run(async () => await PingUntilCancelled(address, token), token);
+
+        private static PingResult NewPingResult(PingReply reply, IPAddress originAddress = null)
+            => new()
             {
-                pingTaskCancellationToken = new CancellationTokenSource();
-            }
+                IpAddress = originAddress.ToString() ?? reply.Address.ToString(),
+                Status = reply.Status,
+                RoundtripTime = reply.RoundtripTime
+            };
+    }
+
+    public class RunningPingTask
+    {
+        public RunningPingTask(Task activeTask, CancellationTokenSource cancellationTokenSource)
+        {
+            CancellationTokenSource = cancellationTokenSource;
+            ActiveTask = activeTask;
         }
 
-        private Task NewPingAddressTask(IPAddress address) => Task.Run(async () => await PingUntilCancelled(address, pingTaskCancellationToken.Token));
-
-        private static PingResult NewPingResult(PingReply reply) => new(reply.Address.ToString(), reply.Status, reply.RoundtripTime);
+        public CancellationTokenSource CancellationTokenSource { get; }
+        public Task ActiveTask { get; }
     }
 }

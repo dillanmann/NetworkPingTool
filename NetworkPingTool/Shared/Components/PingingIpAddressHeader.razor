@@ -2,24 +2,43 @@
 
 <div>
     <MudGrid Class="d-flex align-center">
-        <MudItem xs="6">
+        <MudItem xs="5">
             <MudText><b>Address</b></MudText>
         </MudItem>
-        <MudItem xs="1">
+        <MudItem xs="1" Class="d-flex justify-center">
             <MudText><b>Min (ms)</b></MudText>
         </MudItem>
-        <MudItem xs="1">
+        <MudItem xs="1" Class="d-flex justify-center">
             <MudText><b>Max (ms)</b></MudText>
         </MudItem>
-        <MudItem xs="1">
+        <MudItem xs="1" Class="d-flex justify-center">
             <MudText><b>Avg (ms)</b></MudText>
         </MudItem>
-        <MudItem xs="1">
-            <MudText><b>Trips</b></MudText>
+        <MudItem xs="1" Class="d-flex justify-center">
+            <MudText><b>Ping Count</b></MudText>
         </MudItem>
-        <MudItem xs="1">
+        <MudItem xs="1" Class="d-flex justify-center">
+            <MudText><b>Failures</b></MudText>
         </MudItem>
-        <MudItem xs="1">
+        <MudItem xs="1" Class="d-flex justify-center">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!CanStopAll)" OnClick="@OnStopAllClicked">Stop all</MudButton>
+        </MudItem>
+        <MudItem xs="1" Class="d-flex justify-center">
+            <MudButton Variant="Variant.Filled" Color="Color.Error" Disabled="@(!CanDeleteAll)" OnClick="@OnDeleteAllClicked">Delete all</MudButton>
         </MudItem>
     </MudGrid>
 </div>
+
+@code {
+    [Parameter]
+    public EventCallback OnStopAllClicked { get; set; }
+
+    [Parameter]
+    public EventCallback OnDeleteAllClicked { get; set; }
+
+    [Parameter]
+    public bool CanDeleteAll { get; set; }
+
+    [Parameter]
+    public bool CanStopAll { get; set; }
+}
