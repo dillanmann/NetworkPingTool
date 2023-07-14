@@ -1,7 +1,7 @@
 # Network Ping Tool
 
 ## Description
-A basis Blazor Server web app leveraging SignalR to enable web addresses to be pinged by a web server and push the results to the front end.
+A basic Blazor Server web app leveraging SignalR to enable web addresses to be pinged by a web server and push the results to the front end.
 
 ## Installation
 ### Pre-requisites
