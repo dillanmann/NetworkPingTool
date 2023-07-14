@@ -163,7 +163,7 @@ namespace NetworkPingTool.ViewModels
             pingingIpAddress.MinRoundTripTime = resultsForIp.Min(r => r.RoundtripTime);
             pingingIpAddress.AverageRoundTripTime = (long)resultsForIp.Average(r => r.RoundtripTime);
             pingingIpAddress.CurrentRoundTripTime = result.RoundtripTime;
-            pingingIpAddress.HealthStatus = pingHealthService.GetHealthStatus(resultsForIp, false);
+            pingingIpAddress.HealthStatus = pingHealthService.GetHealthStatus(resultsForIp, pingingIpAddress.IsDnsAddress);
 
             await NotifyStateChange?.Invoke();
         }
@@ -186,6 +186,8 @@ namespace NetworkPingTool.ViewModels
         public long CurrentRoundTripTime { get; set; }
 
         public PingHealthStatus HealthStatus { get; set; }
+
+        public bool IsDnsAddress { get; set; }
 
         public int TotalPings { get; set; }
 
