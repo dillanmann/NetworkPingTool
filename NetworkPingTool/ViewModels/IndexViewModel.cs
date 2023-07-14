@@ -51,12 +51,14 @@ namespace NetworkPingTool.ViewModels
         public async Task DeleteIpAddress(PingingIpAddress ipAddress)
         {
             await StopPingingAddress(ipAddress);
+            pingResults.RemoveAll(p => p.IpAddress == ipAddress.IpAddress);
             IpAddresses.Remove(ipAddress);
         }
 
         public async Task DeleteAllPingingAddresses()
         {
             await StopPingingAllAddresses();
+            pingResults.Clear();
             IpAddresses.Clear();
         }
 
@@ -92,8 +94,6 @@ namespace NetworkPingTool.ViewModels
 
         public override async Task OnInitializedAsync()
         {
-            Console.WriteLine($"In {nameof(IndexViewModel)} {nameof(OnInitializedAsync)}");
-
             if (hubConnection != null) { }
             var client = httpClientFactory.CreateClient("API");
             hubConnection = new HubConnectionBuilder()
@@ -141,7 +141,6 @@ namespace NetworkPingTool.ViewModels
 
         public async ValueTask DisposeAsync()
         {
-            Console.WriteLine($"In {nameof(IndexViewModel)} {nameof(DisposeAsync)}");
             if (hubConnection is not null)
             {
                 await hubConnection.DisposeAsync();

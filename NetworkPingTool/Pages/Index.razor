@@ -34,7 +34,8 @@
                                       OnPlayClicked="async () => await ViewModel.StartPingingAddress(pingingAddress)"
                                       OnStopClicked="async () => await ViewModel.StopPingingAddress(pingingAddress)"
                                       OnDeleteClicked="async () => await ViewModel.DeleteIpAddress(pingingAddress)"
-                                      OnDnsChanged="(value) => pingingAddress.IsDnsAddress = value"/>
+                                      OnDnsChanged="(value) => pingingAddress.IsDnsAddress = value"
+                                      OnLabelChanged="(value) => pingingAddress.Label = value"/>
                     </MudItem>
                 }
                 <MudItem xs="11" Class="d-flex align-center">
@@ -50,7 +51,7 @@
             <Settings />
         </MudTabPanel>
     </MudTabs>
-    
+
 </div>
 
 @code {
