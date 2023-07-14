@@ -155,6 +155,7 @@ namespace NetworkPingTool.ViewModels
             pingingIpAddress.MaxRoundTripTime = resultsForIp.Max(r => r.RoundtripTime);
             pingingIpAddress.MinRoundTripTime = resultsForIp.Min(r => r.RoundtripTime);
             pingingIpAddress.AverageRoundTripTime = (long)resultsForIp.Average(r => r.RoundtripTime);
+            pingingIpAddress.CurrentRoundTripTime = result.RoundtripTime;
 
             await NotifyStateChange?.Invoke();
         }
@@ -171,6 +172,8 @@ namespace NetworkPingTool.ViewModels
         public long MaxRoundTripTime { get; set; }
 
         public long AverageRoundTripTime { get; set; }
+
+        public long CurrentRoundTripTime { get; set; }
 
         public int TotalPings { get; set; }
 
