@@ -11,7 +11,7 @@ namespace NetworkPingTool.Services
     {
         private readonly Dictionary<string, RunningPingTask> activeTasks = new();
         private readonly IHubContext<PingResultHub> pingResultHub;
-        private const int pingIntervalMillis = 500;
+        private int pingIntervalMillis = 500;
 
         public PingAddressService(IHubContext<PingResultHub> pingResultHub)
         {
@@ -60,6 +60,14 @@ namespace NetworkPingTool.Services
             {
                 activeTasks.Remove(taskToRemove);
             }
+        }
+
+        public void SetPingInterval(int intervalMillis)
+        {
+            var activeIpAddresses = activeTasks.Keys.Select(IPAddress.Parse).ToList();
+            StopPingingAllAddresses();
+            pingIntervalMillis = intervalMillis;
+            StartPingingAddresses(activeIpAddresses);
         }
 
         private async Task PingUntilCancelled(IPAddress address, CancellationToken token)

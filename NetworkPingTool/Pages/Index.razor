@@ -3,50 +3,57 @@
 @using NetworkPingTool.Shared.Validators;
 @using NetworkPingTool.ViewModels;
 
-@inject IndexViewModel viewModel;
+@inherits BasePage<IndexViewModel>
 
 <PageTitle>Index</PageTitle>
 
 <div>
-    <MudGrid>
-        <MudItem xs="12" Class="mt-4">
-            <MudText Typo="Typo.h6" Color="Color.Primary">Ping IP Addresses</MudText>
-        </MudItem>
-        <MudItem xs="12">
-            <PingingIpAddressHeader CanDeleteAll="@viewModel.CanDeleteAllPingingAddresses" CanStopAll="@viewModel.CanStopAllPingingAddresses"
-                                    OnDeleteAllClicked="viewModel.DeleteAllPingingAddresses" OnStopAllClicked="viewModel.StopPingingAllAddresses" />
-        </MudItem>
-        @foreach(var pingingAddress in viewModel.IpAddresses)
-        {
-            <MudItem xs="12">
-                <PingingIpAddress
-                    IpAddress="@pingingAddress.IpAddress"
-                    IsActive="@pingingAddress.IsActive"
-                    MinRoundTripTime="@pingingAddress.MinRoundTripTime"
-                    MaxRoundTripTime="@pingingAddress.MaxRoundTripTime"
-                    AverageRoundTripTime="@pingingAddress.AverageRoundTripTime"
-                    TotalPings="@pingingAddress.TotalPings"
-                    TotalFailures="@pingingAddress.TotalFailures"
-                    OnPlayClicked="async () => await viewModel.StartPingingAddress(pingingAddress)"
-                    OnStopClicked="async () => await viewModel.StopPingingAddress(pingingAddress)"
-                    OnDeleteClicked="async () => await viewModel.DeleteIpAddress(pingingAddress)" />
-            </MudItem>
-        }
-        <MudItem xs="11" Class="d-flex align-center">
-            <MudTextField @bind-Text="viewModel.NewAddressToAdd" T="string" Placeholder="New IP Address" Variant="Variant.Outlined"
-            Validation="IpAddressValidator.Validate" DebounceInterval="500"/>
-        </MudItem>
-        <MudItem xs="1" Class="d-flex align-center">
-            <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="@(!viewModel.CanAddNewIpAddress)" OnClick="@viewModel.AddNewIpAddress">Add new IP</MudButton>
-        </MudItem>
-    </MudGrid>
+    <MudTabs Outlined="false">
+        <MudTabPanel Text="Ping Tool" Icon="@Icons.Material.Filled.NetworkPing">
+            <MudGrid>
+                <MudItem xs="12" Class="mt-4">
+                    <MudText Typo="Typo.h6" Color="Color.Primary">Ping IP Addresses</MudText>
+                </MudItem>
+                <MudItem xs="12" Class="mt-0">
+                    <PingingIpAddressHeader CanDeleteAll="@ViewModel.CanDeleteAllPingingAddresses" CanStopAll="@ViewModel.CanStopAllPingingAddresses"
+                                            OnDeleteAllClicked="ViewModel.DeleteAllPingingAddresses" OnStopAllClicked="ViewModel.StopPingingAllAddresses" />
+                </MudItem>
+                @foreach (var pingingAddress in ViewModel.IpAddresses)
+                {
+                    <MudItem xs="12" my="0">
+                        <PingingIpAddress IpAddress="@pingingAddress.IpAddress"
+                                      IsActive="@pingingAddress.IsActive"
+                                      MinRoundTripTime="@pingingAddress.MinRoundTripTime"
+                                      MaxRoundTripTime="@pingingAddress.MaxRoundTripTime"
+                                      AverageRoundTripTime="@pingingAddress.AverageRoundTripTime"
+                                      TotalPings="@pingingAddress.TotalPings"
+                                      TotalFailures="@pingingAddress.TotalFailures"
+                                      OnPlayClicked="async () => await ViewModel.StartPingingAddress(pingingAddress)"
+                                      OnStopClicked="async () => await ViewModel.StopPingingAddress(pingingAddress)"
+                                      OnDeleteClicked="async () => await ViewModel.DeleteIpAddress(pingingAddress)" />
+                    </MudItem>
+                }
+                <MudItem xs="11" Class="d-flex align-center">
+                    <MudTextField @bind-Text="ViewModel.NewAddressToAdd" T="string" Placeholder="New IP Address" Variant="Variant.Outlined"
+                                  Validation="IpAddressValidator.Validate" DebounceInterval="500" />
+                </MudItem>
+                <MudItem xs="1" Class="d-flex align-center">
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="@(!ViewModel.CanAddNewIpAddress)" OnClick="@ViewModel.AddNewIpAddress">Add new IP</MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudTabPanel>
+        <MudTabPanel Text="Settings" Icon="@Icons.Material.Filled.Settings">
+            <Settings />
+        </MudTabPanel>
+    </MudTabs>
+    
 </div>
 
 @code {
     protected override async Task OnInitializedAsync()
     {
-        await viewModel.OnInitializedAsync();
-        viewModel.NotifyStateChange += OnNotify;
+        await ViewModel.OnInitializedAsync();
+        ViewModel.NotifyStateChange += OnNotify;
     }
 
     public async Task OnNotify() => await InvokeAsync(StateHasChanged);

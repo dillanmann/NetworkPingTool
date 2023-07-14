@@ -1,0 +1,22 @@
+﻿@using NetworkPingTool.ViewModels;
+
+@inherits BasePage<SettingsViewModel>
+
+<div class="d-flex justify-center align-center">
+    <MudStack Class="mt-2">
+        <MudAlert Severity="Severity.Info">Changing the ping interval will stop and restart any running ping tasks.</MudAlert>
+        <div class="d-flex flex-row">
+            <MudText Color="Color.Primary" Class="align-self-center pr-4">Ping Interval (ms)</MudText>
+            <MudNumericField Variant="Variant.Outlined" DebounceInterval="500" @bind-Value="@ViewModel.PingInterval" />
+        </div>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@ViewModel.SaveSettings" Disabled="@(!ViewModel.CanSave)">
+            @if (ViewModel.IsLoading == true)
+            {
+                <div class="d-flex pr-3">
+                    <MudProgressCircular Color="Color.Secondary" Size="Size.Small" Indeterminate="true" />
+                </div>
+            }
+            Save
+        </MudButton>
+    </MudStack>
+</div>

@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using NetworkPingTool.Model;
 using System.Text.Json;
-using Microsoft.AspNetCore.Components;
-using NetworkPingTool.Model.RequestObjects;
 using NetworkPingTool.Shared.Validators;
+using NetworkPingTool.Services.NotifySettingsChangedService;
+using NetworkPingTool.Services.PingApiService;
 
 namespace NetworkPingTool.ViewModels
 {
@@ -11,12 +11,16 @@ namespace NetworkPingTool.ViewModels
     {
         private HubConnection hubConnection;
         private readonly IHttpClientFactory httpClientFactory;
+        private readonly INotifySettingsChangedService notifySettingsChangedService;
+        private readonly IPingApiService pingApiService;
         private readonly List<PingResult> pingResults = new();
 
-        public IndexViewModel(IHttpClientFactory httpClientFactory)
+        public IndexViewModel(IHttpClientFactory httpClientFactory, INotifySettingsChangedService notifySettingsChangedService, IPingApiService pingApiService)
         {
             this.httpClientFactory = httpClientFactory;
-            Console.WriteLine($"In {nameof(IndexViewModel)} constructor");
+            this.notifySettingsChangedService = notifySettingsChangedService;
+            this.pingApiService = pingApiService;
+            this.notifySettingsChangedService.SettingsChanged += OnSettingsChanged;
         }
 
         public List<PingingIpAddress> IpAddresses { get; set; } = new List<PingingIpAddress>();
@@ -51,9 +55,8 @@ namespace NetworkPingTool.ViewModels
 
         public async Task StartPingingAddress(PingingIpAddress ipAddress)
         {
-            var client = httpClientFactory.CreateClient("API");
-            var result = await client.PostAsJsonAsync("/ping/pingOne", new StartPingingAddressRequest { IpAddress = ipAddress.IpAddress });
-            if (result.IsSuccessStatusCode)
+            var result = await pingApiService.StartPingingAddressAsync(ipAddress);
+            if (result)
             {
                 ipAddress.IsActive = true;
             }
@@ -61,9 +64,8 @@ namespace NetworkPingTool.ViewModels
 
         public async Task StopPingingAddress(PingingIpAddress ipAddress)
         {
-            var client = httpClientFactory.CreateClient("API");
-            var result = await client.PostAsJsonAsync("/ping/stop", new StopPingingAddressesRequest { IpAddresses = new[] { ipAddress.IpAddress } });
-            if (result.IsSuccessStatusCode)
+            var result = await pingApiService.StopPingingAddressAsync(ipAddress);
+            if (result)
             {
                 ipAddress.IsActive = false;
             }
@@ -71,9 +73,8 @@ namespace NetworkPingTool.ViewModels
 
         public async Task StopPingingAllAddresses()
         {
-            var client = httpClientFactory.CreateClient("API");
-            var result = await client.PostAsJsonAsync("/ping/stopAll", new StopPingingAllAddressesRequest());
-            if (result.IsSuccessStatusCode)
+            var result = await pingApiService.StopPingingAllAddressesAsync();
+            if (result)
             {
                 foreach (var pingingAddress in IpAddresses)
                 {
@@ -100,6 +101,30 @@ namespace NetworkPingTool.ViewModels
 
             hubConnection.Closed += HubConnection_Closed;
             await hubConnection.StartAsync();
+        }
+
+        private async void OnSettingsChanged(object sender, EventArgs e)
+        {
+            var activePingingAddresses = IpAddresses.Where(ip => ip.IsActive).ToList();
+            if (!activePingingAddresses.Any())
+            {
+                return;
+            }
+
+            await StopPingingAllAddresses();
+            await StartPingingAddresses(activePingingAddresses);
+        }
+
+        private async Task StartPingingAddresses(IEnumerable<PingingIpAddress> ipAddresses)
+        {
+            var result = await pingApiService.StartPingingAddressesAsync(ipAddresses);
+            if (result)
+            {
+                foreach (var pingingAddress in IpAddresses)
+                {
+                    pingingAddress.IsActive = true;
+                }
+            }
         }
 
         private async Task HubConnection_Closed(Exception arg)

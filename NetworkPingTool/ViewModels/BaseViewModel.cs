@@ -6,5 +6,7 @@
         public virtual void OnInitialized() { }
         public virtual async Task OnInitializedAsync() => await Task.CompletedTask;
         public virtual async Task OnParametersSetAsync() => await Task.CompletedTask;
+
+        public bool IsLoading { get; set; }
     }
 }

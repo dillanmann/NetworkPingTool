@@ -82,5 +82,18 @@ namespace NetworkPingTool.Controllers
             pingAddressService.StopPingingAllAddresses();
             return Ok();
         }
+
+        [HttpPost]
+        [Route("interval")]
+        public IActionResult UpdatePingInterval([FromBody] UpdatePingIntervalRequest request)
+        {
+            if (request.IntervalMilliseconds < 0)
+            {
+                return BadRequest("Interval can't be negative");
+            }
+            
+            pingAddressService.SetPingInterval(request.IntervalMilliseconds);
+            return Ok();
+        }
     }
 }
