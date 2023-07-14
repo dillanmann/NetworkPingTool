@@ -165,6 +165,8 @@ namespace NetworkPingTool.ViewModels
     {
         public string IpAddress { get; set; }
 
+        public string Label { get; set; }
+
         public bool IsActive { get; set; }
 
         public long MinRoundTripTime { get; set; }
