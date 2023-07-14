@@ -4,6 +4,7 @@ using System.Text.Json;
 using NetworkPingTool.Shared.Validators;
 using NetworkPingTool.Services.NotifySettingsChangedService;
 using NetworkPingTool.Services.PingApiService;
+using NetworkPingTool.Services.PingHealthService;
 
 namespace NetworkPingTool.ViewModels
 {
@@ -13,13 +14,19 @@ namespace NetworkPingTool.ViewModels
         private readonly IHttpClientFactory httpClientFactory;
         private readonly INotifySettingsChangedService notifySettingsChangedService;
         private readonly IPingApiService pingApiService;
+        private readonly IPingHealthService pingHealthService;
         private readonly List<PingResult> pingResults = new();
 
-        public IndexViewModel(IHttpClientFactory httpClientFactory, INotifySettingsChangedService notifySettingsChangedService, IPingApiService pingApiService)
+        public IndexViewModel(
+            IHttpClientFactory httpClientFactory,
+            INotifySettingsChangedService notifySettingsChangedService,
+            IPingApiService pingApiService,
+            IPingHealthService pingHealthService)
         {
             this.httpClientFactory = httpClientFactory;
             this.notifySettingsChangedService = notifySettingsChangedService;
             this.pingApiService = pingApiService;
+            this.pingHealthService = pingHealthService;
             this.notifySettingsChangedService.SettingsChanged += OnSettingsChanged;
         }
 
@@ -156,6 +163,7 @@ namespace NetworkPingTool.ViewModels
             pingingIpAddress.MinRoundTripTime = resultsForIp.Min(r => r.RoundtripTime);
             pingingIpAddress.AverageRoundTripTime = (long)resultsForIp.Average(r => r.RoundtripTime);
             pingingIpAddress.CurrentRoundTripTime = result.RoundtripTime;
+            pingingIpAddress.HealthStatus = pingHealthService.GetHealthStatus(resultsForIp, false);
 
             await NotifyStateChange?.Invoke();
         }
@@ -176,6 +184,8 @@ namespace NetworkPingTool.ViewModels
         public long AverageRoundTripTime { get; set; }
 
         public long CurrentRoundTripTime { get; set; }
+
+        public PingHealthStatus HealthStatus { get; set; }
 
         public int TotalPings { get; set; }
 

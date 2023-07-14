@@ -1,0 +1,38 @@
+﻿@using NetworkPingTool.Model;
+
+@inherits MudComponentBase
+
+<MudTooltip Text="@toolTipText">
+    <MudIcon Icon="@Icons.Material.Filled.Circle" Color="@iconColor" />
+</MudTooltip>
+
+@code {
+    [Parameter]
+    public PingHealthStatus HealthStatus { get; set; }
+
+    private string toolTipText = "No data";
+    private Color iconColor = Color.Info;
+
+    protected override void OnParametersSet()
+    {
+        if (HealthStatus == PingHealthStatus.Green)
+        {
+            iconColor = Color.Success;
+            toolTipText = "Healthy";
+            return;
+        }
+
+        if (HealthStatus == PingHealthStatus.Amber)
+        {
+            iconColor = Color.Warning;
+            toolTipText = "Unhealthy";
+            return;
+        }
+
+        if (HealthStatus == PingHealthStatus.Amber)
+        {
+            iconColor = Color.Error;
+            toolTipText = "Faulted";
+        }
+    }
+}

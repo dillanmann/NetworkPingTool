@@ -1,15 +1,19 @@
-﻿@inherits MudComponentBase
+﻿@using NetworkPingTool.Model;
+@inherits MudComponentBase
 
 <div>
     <MudGrid Class="d-flex align-center">
         <MudItem xs="1" Class="d-flex justify-center">
             <MudTextField Variant="Variant.Outlined" @bind-Text="Label" T="string" />
         </MudItem>
-        <MudItem xs="3" Class="d-flex justify-center">
+        <MudItem xs="2" Class="d-flex justify-center">
             <MudText>@IpAddress</MudText>
         </MudItem>
         <MudItem xs="1" Class="d-flex justify-center">
             <MudText>@CurrentRoundTripTime</MudText>
+        </MudItem>
+        <MudItem xs="1" Class="d-flex justify-center">
+            <PingHealthIcon HealthStatus="@HealthStatus" />
         </MudItem>
         <MudItem xs="1" Class="d-flex justify-center">
             <MudText>@MinRoundTripTime</MudText>
@@ -66,6 +70,9 @@
 
     [Parameter]
     public long TotalFailures { get; set; }
+
+    [Parameter]
+    public PingHealthStatus HealthStatus { get; set; }
 
     [Parameter]
     public EventCallback OnPlayClicked { get; set; }

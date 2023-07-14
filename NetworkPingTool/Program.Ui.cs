@@ -1,6 +1,7 @@
 ﻿using MudBlazor.Services;
 using NetworkPingTool.Services.NotifySettingsChangedService;
 using NetworkPingTool.Services.PingApiService;
+using NetworkPingTool.Services.PingHealthService;
 using NetworkPingTool.ViewModels;
 using System.Reflection;
 
@@ -38,6 +39,7 @@ namespace NetworkPingTool
         {
             services.AddSingleton<INotifySettingsChangedService, NotifySettingsChangedService>();
             services.AddTransient<IPingApiService, PingApiService>();
+            services.AddTransient<IPingHealthService, PingHealthService>();
 
             return services;
         }
