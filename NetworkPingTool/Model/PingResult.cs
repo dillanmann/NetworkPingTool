@@ -11,5 +11,7 @@ namespace NetworkPingTool.Model
         public long RoundtripTime { get; init; }
 
         public bool Success { get => Status == IPStatus.Success; }
+
+        public DateTime TimeCompleted { get; init; }
     }
 }

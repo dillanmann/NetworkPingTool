@@ -101,7 +101,8 @@ namespace NetworkPingTool.Services
             {
                 IpAddress = originAddress.ToString() ?? reply.Address.ToString(),
                 Status = reply.Status,
-                RoundtripTime = reply.RoundtripTime
+                RoundtripTime = reply.RoundtripTime,
+                TimeCompleted = DateTime.UtcNow
             };
     }
 

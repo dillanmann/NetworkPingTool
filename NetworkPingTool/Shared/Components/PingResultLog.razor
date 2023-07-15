@@ -1,0 +1,46 @@
+﻿@using NetworkPingTool.Model;
+@inherits MudComponentBase
+
+<MudDialog>
+    <DialogContent>
+        <MudTable Items="Results" Dense="true">
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortBy="new Func<PingResult, object>(x=>x.Status)">Status</MudTableSortLabel></MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<PingResult, object>(x=>x.RoundtripTime)">Roundtrip Time (ms)</MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<PingResult, object>(x=>x.TimeCompleted)">Timestamp</MudTableSortLabel>
+                </MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.Status.ToString()</MudTd>
+                <MudTd Class="d-flex justify-center">@context.RoundtripTime</MudTd>
+                <MudTd>@context.TimeCompleted</MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }" HorizontalAlignment="HorizontalAlignment.Left"/>
+            </PagerContent>
+        </MudTable>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Close">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<style>
+    .mud-dialog {
+        max-width: 50% !important;
+        min-width: 25% !important;
+        max-height: 75% !important;
+    }
+</style>
+
+@code {
+    [CascadingParameter] MudDialogInstance DialogInstance { get; set; }
+
+    [Parameter]
+    public IEnumerable<PingResult> Results { get; set; }
+
+    void Close() => DialogInstance.Cancel();
+}
