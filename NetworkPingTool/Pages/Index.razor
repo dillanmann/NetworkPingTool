@@ -3,6 +3,7 @@
 @using NetworkPingTool.Shared.Validators;
 @using NetworkPingTool.ViewModels;
 
+@implements IDisposable
 @inherits BasePage<IndexViewModel>
 
 <PageTitle>Index</PageTitle>
@@ -18,7 +19,8 @@
                 {
                     <MudItem xs="2" my="0">
                         <PingingIpAddressCard IpAddress="@pingingAddress.IpAddress"
-                                      Label="@pingingAddress.Label"
+                                      @bind-IsDns="@pingingAddress.IsDnsAddress"
+                                      @bind-Label="@pingingAddress.Label"
                                       IsActive="@pingingAddress.IsActive"
                                       MinRoundTripTime="@pingingAddress.MinRoundTripTime"
                                       MaxRoundTripTime="@pingingAddress.MaxRoundTripTime"
@@ -30,8 +32,6 @@
                                       OnPlayClicked="async () => await ViewModel.StartPingingAddress(pingingAddress)"
                                       OnStopClicked="async () => await ViewModel.StopPingingAddress(pingingAddress)"
                                       OnDeleteClicked="async () => await ViewModel.DeleteIpAddress(pingingAddress)"
-                                      OnDnsChanged="(value) => pingingAddress.IsDnsAddress = value"
-                                      OnLabelChanged="(value) => pingingAddress.Label = value"
                                       Results="@pingingAddress.Results"/>
                     </MudItem>
                 }
@@ -56,6 +56,11 @@
     {
         await ViewModel.OnInitializedAsync();
         ViewModel.NotifyStateChange += OnNotify;
+    }
+
+    void IDisposable.Dispose()
+    {
+        ViewModel.NotifyStateChange -= OnNotify;
     }
 
     public async Task OnNotify() => await InvokeAsync(StateHasChanged);
