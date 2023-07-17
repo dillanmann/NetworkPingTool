@@ -5,6 +5,7 @@ using NetworkPingTool.Shared.Validators;
 using NetworkPingTool.Services.NotifySettingsChangedService;
 using NetworkPingTool.Services.PingApiService;
 using NetworkPingTool.Services.PingHealthService;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace NetworkPingTool.ViewModels
 {
@@ -108,6 +109,14 @@ namespace NetworkPingTool.ViewModels
 
             hubConnection.Closed += HubConnection_Closed;
             await hubConnection.StartAsync();
+        }
+
+        public void OnKeyUp(KeyboardEventArgs keyboardEventArgs)
+        {
+            if (keyboardEventArgs.Key == "Enter" && CanAddNewIpAddress)
+            {
+                AddNewIpAddress();
+            }
         }
 
         private async void OnSettingsChanged(object sender, EventArgs e)
