@@ -12,22 +12,22 @@ namespace NetworkPingTool.ViewModels
     public class IndexViewModel : BaseViewModel
     {
         private HubConnection hubConnection;
-        private readonly IHttpClientFactory httpClientFactory;
         private readonly INotifySettingsChangedService notifySettingsChangedService;
         private readonly IPingApiService pingApiService;
         private readonly IPingHealthService pingHealthService;
+        private readonly IConfiguration configuration;
         private readonly List<PingResult> pingResults = new();
 
         public IndexViewModel(
-            IHttpClientFactory httpClientFactory,
             INotifySettingsChangedService notifySettingsChangedService,
             IPingApiService pingApiService,
-            IPingHealthService pingHealthService)
+            IPingHealthService pingHealthService,
+            IConfiguration configuration)
         {
-            this.httpClientFactory = httpClientFactory;
             this.notifySettingsChangedService = notifySettingsChangedService;
             this.pingApiService = pingApiService;
             this.pingHealthService = pingHealthService;
+            this.configuration = configuration;
             this.notifySettingsChangedService.SettingsChanged += OnSettingsChanged;
         }
 
@@ -96,9 +96,9 @@ namespace NetworkPingTool.ViewModels
         public override async Task OnInitializedAsync()
         {
             if (hubConnection != null) { }
-            var client = httpClientFactory.CreateClient("API");
+            var baseAddress = configuration.GetValue<string>("ApiRootUrl");
             hubConnection = new HubConnectionBuilder()
-                .WithUrl($"{client.BaseAddress}pingresulthub")
+                .WithUrl($"{baseAddress}/pingresulthub")
                 .Build();
 
             hubConnection.On<string>("SendPingResult", async (pingReplyJson) =>
