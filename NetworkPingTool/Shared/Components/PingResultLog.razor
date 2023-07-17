@@ -42,5 +42,7 @@
     [Parameter]
     public IEnumerable<PingResult> Results { get; set; }
 
+    public void Refresh() => StateHasChanged();
+
     void Close() => DialogInstance.Cancel();
 }
