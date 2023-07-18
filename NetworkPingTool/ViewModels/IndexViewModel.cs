@@ -1,37 +1,37 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.SignalR.Client;
 using NetworkPingTool.Model;
-using System.Text.Json;
-using NetworkPingTool.Shared.Validators;
 using NetworkPingTool.Services.NotifySettingsChangedService;
 using NetworkPingTool.Services.PingApiService;
 using NetworkPingTool.Services.PingHealthService;
-using Microsoft.AspNetCore.Components.Web;
+using NetworkPingTool.Shared.Validators;
+using System.Text.Json;
 
 namespace NetworkPingTool.ViewModels
 {
-    public class IndexViewModel : BaseViewModel
+    public class IndexViewModel : BaseViewModel, IAsyncDisposable
     {
         private HubConnection hubConnection;
-        private readonly IHttpClientFactory httpClientFactory;
         private readonly INotifySettingsChangedService notifySettingsChangedService;
         private readonly IPingApiService pingApiService;
         private readonly IPingHealthService pingHealthService;
-        private readonly List<PingResult> pingResults = new();
+        private readonly IConfiguration configuration;
+        private int pingRecordsToStore = 100;
 
         public IndexViewModel(
-            IHttpClientFactory httpClientFactory,
             INotifySettingsChangedService notifySettingsChangedService,
             IPingApiService pingApiService,
-            IPingHealthService pingHealthService)
+            IPingHealthService pingHealthService,
+            IConfiguration configuration)
         {
-            this.httpClientFactory = httpClientFactory;
             this.notifySettingsChangedService = notifySettingsChangedService;
             this.pingApiService = pingApiService;
             this.pingHealthService = pingHealthService;
+            this.configuration = configuration;
             this.notifySettingsChangedService.SettingsChanged += OnSettingsChanged;
         }
 
-        public List<PingingIpAddress> IpAddresses { get; set; } = new List<PingingIpAddress>();
+        public List<PingingIpAddressViewModel> IpAddresses { get; set; } = new List<PingingIpAddressViewModel>();
 
         public string NewAddressToAdd { get; set; }
 
@@ -45,25 +45,23 @@ namespace NetworkPingTool.ViewModels
 
         public void AddNewIpAddress()
         {
-            IpAddresses.Add(new PingingIpAddress() { IpAddress = NewAddressToAdd });
+            IpAddresses.Add(new PingingIpAddressViewModel(pingHealthService, pingRecordsToStore) { IpAddress = NewAddressToAdd });
             NewAddressToAdd = null;
         }
 
-        public async Task DeleteIpAddress(PingingIpAddress ipAddress)
+        public async Task DeleteIpAddress(PingingIpAddressViewModel ipAddress)
         {
             await StopPingingAddress(ipAddress);
-            pingResults.RemoveAll(p => p.IpAddress == ipAddress.IpAddress);
             IpAddresses.Remove(ipAddress);
         }
 
         public async Task DeleteAllPingingAddresses()
         {
             await StopPingingAllAddresses();
-            pingResults.Clear();
             IpAddresses.Clear();
         }
 
-        public async Task StartPingingAddress(PingingIpAddress ipAddress)
+        public async Task StartPingingAddress(PingingIpAddressViewModel ipAddress)
         {
             var result = await pingApiService.StartPingingAddressAsync(ipAddress);
             if (result)
@@ -72,7 +70,7 @@ namespace NetworkPingTool.ViewModels
             }
         }
 
-        public async Task StopPingingAddress(PingingIpAddress ipAddress)
+        public async Task StopPingingAddress(PingingIpAddressViewModel ipAddress)
         {
             var result = await pingApiService.StopPingingAddressAsync(ipAddress);
             if (result)
@@ -96,9 +94,9 @@ namespace NetworkPingTool.ViewModels
         public override async Task OnInitializedAsync()
         {
             if (hubConnection != null) { }
-            var client = httpClientFactory.CreateClient("API");
+            var baseAddress = configuration.GetValue<string>("ApiRootUrl");
             hubConnection = new HubConnectionBuilder()
-                .WithUrl($"{client.BaseAddress}pingresulthub")
+                .WithUrl($"{baseAddress}/pingresulthub")
                 .Build();
 
             hubConnection.On<string>("SendPingResult", async (pingReplyJson) =>
@@ -119,19 +117,37 @@ namespace NetworkPingTool.ViewModels
             }
         }
 
-        private async void OnSettingsChanged(object sender, EventArgs e)
+        public async ValueTask DisposeAsync()
         {
+            if (hubConnection is not null)
+            {
+                await hubConnection.DisposeAsync();
+                GC.SuppressFinalize(this);
+            }
+        }
+
+        private async void OnSettingsChanged(object sender, SettingsChangedEventArgs settingsEventArgs)
+        {
+            if (settingsEventArgs.TotalPingsToStore.HasValue)
+            {
+                PropogatePingRecordsToStoreChanged(settingsEventArgs.TotalPingsToStore.Value);
+            }
+
             var activePingingAddresses = IpAddresses.Where(ip => ip.IsActive).ToList();
             if (!activePingingAddresses.Any())
             {
                 return;
             }
 
-            await StopPingingAllAddresses();
-            await StartPingingAddresses(activePingingAddresses);
+            // Ping interval changed so need to restart running tasks
+            if (settingsEventArgs.PingIntervalMillis.HasValue)
+            {
+                await StopPingingAllAddresses();
+                await StartPingingAddresses(activePingingAddresses);
+            }
         }
 
-        private async Task StartPingingAddresses(IEnumerable<PingingIpAddress> ipAddresses)
+        private async Task StartPingingAddresses(IEnumerable<PingingIpAddressViewModel> ipAddresses)
         {
             var result = await pingApiService.StartPingingAddressesAsync(ipAddresses);
             if (result)
@@ -148,60 +164,21 @@ namespace NetworkPingTool.ViewModels
             await hubConnection.StartAsync();
         }
 
-        public async ValueTask DisposeAsync()
-        {
-            if (hubConnection is not null)
-            {
-                await hubConnection.DisposeAsync();
-            }
-        }
-
         private async Task OnNewPingResult(PingResult result)
         {
-            pingResults.Add(result);
             var pingingIpAddress = IpAddresses.First(ip => ip.IpAddress == result.IpAddress);
-
-            pingingIpAddress.TotalPings += 1;
-            if (!result.Success)
-            {
-                pingingIpAddress.TotalFailures += 1;
-            }
-            var resultsForIp = pingResults.Where(ip => ip.IpAddress == result.IpAddress);
-            pingingIpAddress.MaxRoundTripTime = resultsForIp.Max(r => r.RoundtripTime);
-            pingingIpAddress.MinRoundTripTime = resultsForIp.Min(r => r.RoundtripTime);
-            pingingIpAddress.AverageRoundTripTime = (long)resultsForIp.Average(r => r.RoundtripTime);
-            pingingIpAddress.CurrentRoundTripTime = result.RoundtripTime;
-            pingingIpAddress.HealthStatus = pingHealthService.GetHealthStatus(resultsForIp, pingingIpAddress.IsDnsAddress);
-            pingingIpAddress.Results = resultsForIp;
+            await pingingIpAddress.AddNewResult(result);
 
             await NotifyStateChange?.Invoke();
         }
-    }
 
-    public class PingingIpAddress
-    {
-        public string IpAddress { get; set; }
-
-        public string Label { get; set; }
-
-        public bool IsActive { get; set; }
-
-        public long MinRoundTripTime { get; set; }
-
-        public long MaxRoundTripTime { get; set; }
-
-        public long AverageRoundTripTime { get; set; }
-
-        public long CurrentRoundTripTime { get; set; }
-
-        public PingHealthStatus HealthStatus { get; set; }
-
-        public bool IsDnsAddress { get; set; }
-
-        public int TotalPings { get; set; }
-
-        public int TotalFailures { get; set; }
-
-        public IEnumerable<PingResult> Results { get; set; }
+        private void PropogatePingRecordsToStoreChanged(int recordsToStore)
+        {
+            this.pingRecordsToStore = recordsToStore;
+            foreach (var address in IpAddresses)
+            {
+                address.UpdateRecordsToStore(recordsToStore);
+            }
+        }
     }
 }

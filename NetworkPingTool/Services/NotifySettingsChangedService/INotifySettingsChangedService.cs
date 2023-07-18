@@ -1,9 +1,11 @@
-﻿namespace NetworkPingTool.Services.NotifySettingsChangedService
+﻿using NetworkPingTool.Model;
+
+namespace NetworkPingTool.Services.NotifySettingsChangedService
 {
     public interface INotifySettingsChangedService
     {
-        public event EventHandler SettingsChanged;
+        public event EventHandler<SettingsChangedEventArgs> SettingsChanged;
 
-        void EmitSettingsChanged();
+        void EmitSettingsChanged(SettingsChangedEventArgs settings);
     }
 }
