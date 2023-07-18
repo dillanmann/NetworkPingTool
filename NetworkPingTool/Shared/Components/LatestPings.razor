@@ -1,0 +1,32 @@
+﻿@using NetworkPingTool.Model;
+<div>
+    <MudStack>
+        <div class="d-flex flex-row align-center">
+            <MudText><b>Latest 3 Pings</b></MudText>
+            <MudIconButton Icon="@collapseIcon" OnClick="() => collapse = !collapse" Class="pa-0" />
+        </div>
+        @if (!collapse)
+        {
+            @foreach (var result in Results)
+            {
+                <MudText Color="@GetResultColor(result)" Class="ml-2 latest-ping-row">@BuildResultDisplayText(result)</MudText>
+            }
+        }
+    </MudStack>
+</div>
+
+@code {
+    [Parameter]
+    public IEnumerable<PingResult> Results { get; set; }
+
+    private bool collapse { get; set; } = false;
+
+    private string collapseIcon { get => collapse ? @Icons.Material.Filled.ArrowDropDown : @Icons.Material.Filled.ArrowDropUp; }
+
+    private string BuildResultDisplayText(PingResult result)
+        => result.Success
+            ? $"Success ({result.RoundtripTime.ToString()} ms)"
+            : result.Status.ToString();
+
+    private Color GetResultColor(PingResult result) => result.Success ? Color.Success : Color.Error;
+}

@@ -16,6 +16,9 @@
     [Parameter]
     public long MaxRoundTripTime { get; set; }
 
+    [Parameter]
+    public long AverageRoundTripTime { get; set; }
+
     private string toolTipText = "No data";
     private Color iconColor = Color.Info;
 
@@ -42,7 +45,7 @@
 
     private string GetToolTipTextFromHealthStatus(PingHealthStatus status)
     {
-        var minMaxStatText = $"\nMax:{MaxRoundTripTime}ms\nMin:{MinRoundTripTime}ms";
+        var minMaxStatText = $"\nAvg:{AverageRoundTripTime}ms\nMax:{MaxRoundTripTime}ms\nMin:{MinRoundTripTime}ms";
         var textStatus = "";
         switch (status)
         {
