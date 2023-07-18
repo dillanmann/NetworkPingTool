@@ -12,31 +12,38 @@
     <MudTabs Outlined="false">
         <MudTabPanel Text="Ping Tool" Icon="@Icons.Material.Filled.NetworkPing">
             <MudGrid>
-                <MudItem xs="12" Class="mt-0">
-                    <MudText Typo="Typo.h6" Color="Color.Primary">Ping IP Addresses</MudText>
+                <MudItem xs="12" Class="mt-2 mb-0 pb-2">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mr-2"
+                               Disabled="@(!ViewModel.CanStopAllPingingAddresses)" OnClick="@ViewModel.StopPingingAllAddresses">
+                        Stop all
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Error"
+                               Disabled="@(!ViewModel.CanDeleteAllPingingAddresses)" OnClick="@ViewModel.DeleteAllPingingAddresses">
+                        Delete all
+                    </MudButton>
                 </MudItem>
                 @foreach (var pingingAddress in ViewModel.IpAddresses)
                 {
-                    <MudItem xs="12" sm="6" md="4" lg="3" xl="2" my="0">
+                    <MudItem xs="12" sm="6" md="4" lg="3" xl="2" Class="my-0 py-0">
                         <PingingIpAddressCard IpAddress="@pingingAddress.IpAddress"
-                                      @bind-IsDns="@pingingAddress.IsDnsAddress"
-                                      @bind-Label="@pingingAddress.Label"
-                                      IsActive="@pingingAddress.IsActive"
-                                      MinRoundTripTime="@pingingAddress.MinRoundTripTime"
-                                      MaxRoundTripTime="@pingingAddress.MaxRoundTripTime"
-                                      AverageRoundTripTime="@pingingAddress.AverageRoundTripTime"
-                                      CurrentRoundTripTime="@pingingAddress.CurrentRoundTripTime"
-                                      HealthStatus="@pingingAddress.HealthStatus"
-                                      TotalPings="@pingingAddress.TotalPings"
-                                      TotalFailures="@pingingAddress.TotalFailures"
-                                      OnPlayClicked="async () => await ViewModel.StartPingingAddress(pingingAddress)"
-                                      OnStopClicked="async () => await ViewModel.StopPingingAddress(pingingAddress)"
-                                      OnDeleteClicked="async () => await ViewModel.DeleteIpAddress(pingingAddress)"
-                                      Results="@pingingAddress.Results"/>
+                                          @bind-IsDns="@pingingAddress.IsDnsAddress"
+                                          @bind-Label="@pingingAddress.Label"
+                                          IsActive="@pingingAddress.IsActive"
+                                          MinRoundTripTime="@pingingAddress.MinRoundTripTime"
+                                          MaxRoundTripTime="@pingingAddress.MaxRoundTripTime"
+                                          AverageRoundTripTime="@pingingAddress.AverageRoundTripTime"
+                                          CurrentRoundTripTime="@pingingAddress.CurrentRoundTripTime"
+                                          HealthStatus="@pingingAddress.HealthStatus"
+                                          TotalPings="@pingingAddress.TotalPings"
+                                          TotalFailures="@pingingAddress.TotalFailures"
+                                          OnPlayClicked="async () => await ViewModel.StartPingingAddress(pingingAddress)"
+                                          OnStopClicked="async () => await ViewModel.StopPingingAddress(pingingAddress)"
+                                          OnDeleteClicked="async () => await ViewModel.DeleteIpAddress(pingingAddress)"
+                                          Results="@pingingAddress.Results" />
                     </MudItem>
                 }
 
-                <MudItem xs="12" sm="6" md="4" lg="3" xl="2" my="0">
+                <MudItem xs="12" sm="6" md="4" lg="3" xl="2" Class="my-0 py-0">
                     <NewIpAddress ExistingConnections="ViewModel.IpAddresses" AddNewAddressClicked="@ViewModel.AddNewIpAddress" />
                 </MudItem>
             </MudGrid>
