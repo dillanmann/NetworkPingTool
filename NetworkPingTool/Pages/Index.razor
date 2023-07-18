@@ -25,21 +25,7 @@
                 @foreach (var pingingAddress in ViewModel.IpAddresses)
                 {
                     <MudItem xs="12" sm="6" md="4" lg="3" xl="2" Class="my-0 py-0">
-                        <PingingIpAddressCard IpAddress="@pingingAddress.IpAddress"
-                                          @bind-IsDns="@pingingAddress.IsDnsAddress"
-                                          @bind-Label="@pingingAddress.Label"
-                                          IsActive="@pingingAddress.IsActive"
-                                          MinRoundTripTime="@pingingAddress.MinRoundTripTime"
-                                          MaxRoundTripTime="@pingingAddress.MaxRoundTripTime"
-                                          AverageRoundTripTime="@pingingAddress.AverageRoundTripTime"
-                                          CurrentRoundTripTime="@pingingAddress.CurrentRoundTripTime"
-                                          HealthStatus="@pingingAddress.HealthStatus"
-                                          TotalPings="@pingingAddress.TotalPings"
-                                          TotalFailures="@pingingAddress.TotalFailures"
-                                          OnPlayClicked="async () => await ViewModel.StartPingingAddress(pingingAddress)"
-                                          OnStopClicked="async () => await ViewModel.StopPingingAddress(pingingAddress)"
-                                          OnDeleteClicked="async () => await ViewModel.DeleteIpAddress(pingingAddress)"
-                                          Results="@pingingAddress.Results" />
+                        <PingingIpAddressCard ViewModel="pingingAddress" OnDeleteClicked="async () => await ViewModel.DeleteIpAddress(pingingAddress)"/>
                     </MudItem>
                 }
 

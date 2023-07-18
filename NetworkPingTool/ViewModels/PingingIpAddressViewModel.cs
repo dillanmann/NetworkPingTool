@@ -1,4 +1,5 @@
 ﻿using NetworkPingTool.Model;
+using NetworkPingTool.Services.PingApiService;
 using NetworkPingTool.Services.PingHealthService;
 
 namespace NetworkPingTool.ViewModels
@@ -6,11 +7,13 @@ namespace NetworkPingTool.ViewModels
     public class PingingIpAddressViewModel
     {
         private readonly IPingHealthService pingHealthService;
+        private readonly IPingApiService pingApiService;
         private int recordsToStore;
 
-        public PingingIpAddressViewModel(IPingHealthService pingHealthService, int pingRecordsToStore)
+        public PingingIpAddressViewModel(IPingHealthService pingHealthService, IPingApiService pingApiService, int pingRecordsToStore)
         {
             this.pingHealthService = pingHealthService;
+            this.pingApiService = pingApiService;
             this.recordsToStore = pingRecordsToStore;
         }
 
@@ -58,5 +61,35 @@ namespace NetworkPingTool.ViewModels
         }
 
         public void UpdateRecordsToStore(int pingRecordsToStore) => recordsToStore = pingRecordsToStore;
+
+        public async Task StartPingingAsync()
+        {
+            var result = await pingApiService.StartPingingAddressAsync(this);
+            if (result)
+            {
+                IsActive = true;
+            }
+        }
+
+        public async Task StopPingingAsync()
+        {
+            var result = await pingApiService.StopPingingAddressAsync(this);
+            if (result)
+            {
+                IsActive = false;
+            }
+        }
+
+        public async Task OnPlayStopButtonClick()
+        {
+            if (IsActive)
+            {
+                await StopPingingAsync();
+            }
+            else
+            {
+                await StartPingingAsync();
+            }
+        }
     }
 }

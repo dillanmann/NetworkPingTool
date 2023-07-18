@@ -40,7 +40,7 @@ namespace NetworkPingTool.ViewModels
         public void AddNewIpAddress(CreateConnectionEventArgs createConnectionEvent)
         {
             IpAddresses.Add(
-                new PingingIpAddressViewModel(pingHealthService, pingRecordsToStore)
+                new PingingIpAddressViewModel(pingHealthService, pingApiService, pingRecordsToStore)
                 {
                     IpAddress = createConnectionEvent.IpAddress,
                     IsDnsAddress = createConnectionEvent.IsDns,
@@ -50,7 +50,7 @@ namespace NetworkPingTool.ViewModels
 
         public async Task DeleteIpAddress(PingingIpAddressViewModel ipAddress)
         {
-            await StopPingingAddress(ipAddress);
+            await ipAddress.StopPingingAsync();
             IpAddresses.Remove(ipAddress);
         }
 
@@ -58,24 +58,6 @@ namespace NetworkPingTool.ViewModels
         {
             await StopPingingAllAddresses();
             IpAddresses.Clear();
-        }
-
-        public async Task StartPingingAddress(PingingIpAddressViewModel ipAddress)
-        {
-            var result = await pingApiService.StartPingingAddressAsync(ipAddress);
-            if (result)
-            {
-                ipAddress.IsActive = true;
-            }
-        }
-
-        public async Task StopPingingAddress(PingingIpAddressViewModel ipAddress)
-        {
-            var result = await pingApiService.StopPingingAddressAsync(ipAddress);
-            if (result)
-            {
-                ipAddress.IsActive = false;
-            }
         }
 
         public async Task StopPingingAllAddresses()
