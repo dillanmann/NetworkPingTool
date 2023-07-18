@@ -12,21 +12,21 @@ namespace NetworkPingTool.Services.PingApiService
             this.httpClientFactory = httpClientFactory;
         }
 
-        public async Task<bool> StartPingingAddressAsync(PingingIpAddress ipAddress)
+        public async Task<bool> StartPingingAddressAsync(PingingIpAddressViewModel ipAddress)
         {
             var client = httpClientFactory.CreateClient("API");
             var result = await client.PostAsJsonAsync("/ping/pingOne", new StartPingingAddressRequest { IpAddress = ipAddress.IpAddress });
             return result.IsSuccessStatusCode;
         }
 
-        public async Task<bool> StartPingingAddressesAsync(IEnumerable<PingingIpAddress> ipAddresses)
+        public async Task<bool> StartPingingAddressesAsync(IEnumerable<PingingIpAddressViewModel> ipAddresses)
         {
             var client = httpClientFactory.CreateClient("API");
             var result = await client.PostAsJsonAsync("/ping/pingMany", new StartPingingAddressesRequest { IpAddresses = ipAddresses.Select(ip => ip.IpAddress) });
             return result.IsSuccessStatusCode;
         }
 
-        public async Task<bool> StopPingingAddressAsync(PingingIpAddress ipAddress)
+        public async Task<bool> StopPingingAddressAsync(PingingIpAddressViewModel ipAddress)
         {
             var client = httpClientFactory.CreateClient("API");
             var result = await client.PostAsJsonAsync("/ping/stop", new StopPingingAddressesRequest { IpAddresses = new[] { ipAddress.IpAddress } });
@@ -38,6 +38,13 @@ namespace NetworkPingTool.Services.PingApiService
             var client = httpClientFactory.CreateClient("API");
             var result = await client.PostAsJsonAsync("/ping/stopAll", new StopPingingAllAddressesRequest());
             return result.IsSuccessStatusCode;
+        }
+
+        public async Task<HttpResponseMessage> UpdatePingInterval(int intervalMilliseconds)
+        {
+            var client = httpClientFactory.CreateClient("API");
+            var result = await client.PostAsJsonAsync("/ping/interval", new UpdatePingIntervalRequest { IntervalMilliseconds = intervalMilliseconds });
+            return result;
         }
     }
 }

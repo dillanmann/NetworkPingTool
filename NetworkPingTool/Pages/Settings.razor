@@ -4,10 +4,19 @@
 
 <div class="d-flex justify-center align-center">
     <MudStack Class="mt-2">
-        <MudAlert Severity="Severity.Info">Changing the ping interval will stop and restart any running ping tasks.</MudAlert>
-        <div class="d-flex flex-row">
+        <div class="d-flex flex-row align-center">
             <MudText Color="Color.Primary" Class="align-self-center pr-4">Ping Interval (ms)</MudText>
-            <MudNumericField Variant="Variant.Outlined" DebounceInterval="500" @bind-Value="@ViewModel.PingInterval" />
+            <MudNumericField Variant="Variant.Outlined" DebounceInterval="500" @bind-Value="@ViewModel.PingInterval.Value" Min="100" />
+            <MudTooltip Text="Changing the ping interval will stop and restart any running ping tasks.">
+                <MudIconButton Icon="@Icons.Material.Outlined.Info" Color="Color.Warning" />
+            </MudTooltip>
+        </div>
+        <div class="d-flex flex-row align-center">
+            <MudText Color="Color.Primary" Class="align-self-center pr-4">Pings To Store</MudText>
+            <MudNumericField Variant="Variant.Outlined" DebounceInterval="500" @bind-Value="@ViewModel.TotalPingsToStore.Value" Min="1"/>
+            <MudTooltip Text="The total number of most recent pings to record and use in calculations (e.g. min, max, average).">
+                <MudIconButton Icon="@Icons.Material.Outlined.Info" Color="Color.Info" />
+            </MudTooltip>
         </div>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@ViewModel.SaveSettings" Disabled="@(!ViewModel.CanSave)">
             @if (ViewModel.IsLoading == true)

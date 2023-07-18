@@ -135,10 +135,10 @@
         if (logDialog != null)
         {
             var pingResultLog = (logDialog.Dialog as PingResultLog);
-            if (pingResultLog.Results != Results)
-            {
-                pingResultLog.Refresh();
-            }
+#pragma warning disable BL0005 // Necessary due to the way Dialog binding works
+            pingResultLog.Results = Results;
+#pragma warning restore BL0005
+            pingResultLog.Refresh();
         }
     }
 
@@ -147,7 +147,7 @@
         var options = new DialogOptions { CloseOnEscapeKey = true };
         var parameters = new DialogParameters
         {
-            { "Results", Results }
+            { nameof(PingResultLog.Results), Results }
         };
         logDialog = await DialogService.ShowAsync<PingResultLog>($"Log for {IpAddress}", parameters, options);
         await logDialog.Result;

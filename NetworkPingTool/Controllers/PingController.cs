@@ -91,7 +91,7 @@ namespace NetworkPingTool.Controllers
             {
                 return BadRequest("Interval can't be negative");
             }
-            
+
             pingAddressService.SetPingInterval(request.IntervalMilliseconds);
             return Ok();
         }

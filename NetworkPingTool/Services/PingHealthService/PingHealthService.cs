@@ -26,7 +26,7 @@ namespace NetworkPingTool.Services.PingHealthService
             }
 
             return GetPingHealthStatus(average);
-            
+
         }
 
         private PingHealthStatus GetDnsHealthStatus(double average)

@@ -4,9 +4,10 @@ namespace NetworkPingTool.Services.PingApiService
 {
     public interface IPingApiService
     {
-        Task<bool> StartPingingAddressAsync(PingingIpAddress ipAddress);
-        Task<bool> StartPingingAddressesAsync(IEnumerable<PingingIpAddress> ipAddress);
-        Task<bool> StopPingingAddressAsync(PingingIpAddress ipAddress);
+        Task<bool> StartPingingAddressAsync(PingingIpAddressViewModel ipAddress);
+        Task<bool> StartPingingAddressesAsync(IEnumerable<PingingIpAddressViewModel> ipAddress);
+        Task<bool> StopPingingAddressAsync(PingingIpAddressViewModel ipAddress);
         Task<bool> StopPingingAllAddressesAsync();
+        Task<HttpResponseMessage> UpdatePingInterval(int intervalMilliseconds);
     }
 }
