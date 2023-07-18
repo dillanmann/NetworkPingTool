@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.SignalR.Client;
 using NetworkPingTool.Model;
 using NetworkPingTool.Services.NotifySettingsChangedService;
 using NetworkPingTool.Services.PingApiService;
 using NetworkPingTool.Services.PingHealthService;
-using NetworkPingTool.Shared.Validators;
 using System.Text.Json;
 
 namespace NetworkPingTool.ViewModels
@@ -33,20 +31,21 @@ namespace NetworkPingTool.ViewModels
 
         public List<PingingIpAddressViewModel> IpAddresses { get; set; } = new List<PingingIpAddressViewModel>();
 
-        public string NewAddressToAdd { get; set; }
-
-        public bool CanAddNewIpAddress { get => IpAddressValidator.IpAddressIsValid(NewAddressToAdd) && !IpAddresses.Any(ip => ip.IpAddress == NewAddressToAdd); }
-
         public bool CanDeleteAllPingingAddresses { get => IpAddresses.Any() && IpAddresses.All(ip => ip.IsActive == false); }
 
         public bool CanStopAllPingingAddresses { get => IpAddresses.Any(ip => ip.IsActive); }
 
         public event Func<Task> NotifyStateChange;
 
-        public void AddNewIpAddress()
+        public void AddNewIpAddress(CreateConnectionEventArgs createConnectionEvent)
         {
-            IpAddresses.Add(new PingingIpAddressViewModel(pingHealthService, pingRecordsToStore) { IpAddress = NewAddressToAdd });
-            NewAddressToAdd = null;
+            IpAddresses.Add(
+                new PingingIpAddressViewModel(pingHealthService, pingRecordsToStore)
+                {
+                    IpAddress = createConnectionEvent.IpAddress,
+                    IsDnsAddress = createConnectionEvent.IsDns,
+                    Label = createConnectionEvent.Label
+                });
         }
 
         public async Task DeleteIpAddress(PingingIpAddressViewModel ipAddress)
@@ -107,14 +106,6 @@ namespace NetworkPingTool.ViewModels
 
             hubConnection.Closed += HubConnection_Closed;
             await hubConnection.StartAsync();
-        }
-
-        public void OnKeyUp(KeyboardEventArgs keyboardEventArgs)
-        {
-            if (keyboardEventArgs.Key == "Enter" && CanAddNewIpAddress)
-            {
-                AddNewIpAddress();
-            }
         }
 
         public async ValueTask DisposeAsync()

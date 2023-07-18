@@ -1,0 +1,12 @@
+﻿::deep .mud-card {
+    min-height: 20em;
+    height: 100%;
+}
+
+::deep .mud-card-content {
+    height: 100%;
+}
+
+::deep .add-new-address {
+    height: 100%;
+}

@@ -1,0 +1,80 @@
+﻿@using NetworkPingTool.Model;
+@using NetworkPingTool.Shared.Validators;
+@using NetworkPingTool.ViewModels;
+@inherits MudComponentBase
+
+<div style="height: 100%;">
+    <MudCard>
+        <MudCardContent>
+            @if (IsActive)
+            {
+                <div class="d-flex flex-column add-new-address">
+                    <MudTextField @bind-Text="Address" T="string" Placeholder="IP Address" Variant="Variant.Outlined"
+                              Validation="IpAddressValidator.Validate" DebounceInterval="500" OnKeyUp="@OnKeyUp" />
+                    <MudTextField @bind-Text="Label" T="string" Placeholder="Address Label" Variant="Variant.Outlined" DebounceInterval="500" />
+                    <MudCheckBox @bind-Checked="IsDns" Dense="true" Label="Is DNS" LabelPosition="LabelPosition.Start" Class="align-self-start" />
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                           Disabled="@(!CanAddNewIpAddress)" OnClick="@AddNewIpAddress" Class="justify-self-end">
+                        Add
+                    </MudButton>
+                    <MudButton Color="Color.Error" Variant="Variant.Filled" Class="justify-self-end mt-2" OnClick="Reset">
+                        Cancel
+                    </MudButton>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column align-center justify-center add-new-address">
+                    <MudIconButton Icon="@Icons.Material.Filled.AddCircle" Size="Size.Large" OnClick="@OnClickNewConnection" />
+                    <MudText>New Connection</MudText>
+                </div>
+            }
+            <MudGrid>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+
+
+</div>
+
+@code {
+    private bool IsActive { get; set; }
+
+    public string Address { get; set; }
+
+    private string Label { get; set; }
+
+    private bool IsDns { get; set; }
+
+    private bool CanAddNewIpAddress { get => IpAddressValidator.IpAddressIsValid(Address) && !ExistingConnections.Any(ip => ip.IpAddress == Address); }
+
+    private void OnClickNewConnection() => IsActive = true;
+
+    [Parameter]
+    public EventCallback<CreateConnectionEventArgs> AddNewAddressClicked { get; set; }
+
+    [Parameter]
+    public IEnumerable<PingingIpAddressViewModel> ExistingConnections { get; set; }
+
+    private async Task AddNewIpAddress()
+    {
+        await AddNewAddressClicked.InvokeAsync(new CreateConnectionEventArgs(Address, Label, IsDns));
+        Reset();
+    }
+
+    private async Task OnKeyUp(KeyboardEventArgs keyboardEventArgs)
+    {
+        if (keyboardEventArgs.Key == "Enter" && CanAddNewIpAddress)
+        {
+            await AddNewIpAddress();
+        }
+    }
+
+    private void Reset()
+    {
+        IsActive = false;
+        Address = null;
+        Label = null;
+        IsDns = false;
+    }
+}

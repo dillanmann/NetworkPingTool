@@ -35,15 +35,9 @@
                                       Results="@pingingAddress.Results"/>
                     </MudItem>
                 }
-                <MudItem xs="8" sm="10" Class="d-flex align-center">
-                    <MudTextField @bind-Text="ViewModel.NewAddressToAdd" T="string" Placeholder="New IP Address" Variant="Variant.Outlined"
-                                  Validation="IpAddressValidator.Validate" DebounceInterval="500" OnKeyUp="@ViewModel.OnKeyUp" />
-                </MudItem>
-                <MudItem xs="4" sm="2" Class="d-flex align-center">
-                    <MudButton Color="Color.Primary" Variant="Variant.Filled"
-                               Disabled="@(!ViewModel.CanAddNewIpAddress)" OnClick="@ViewModel.AddNewIpAddress">
-                        Add new IP
-                        </MudButton>
+
+                <MudItem xs="12" sm="6" md="4" lg="3" xl="2" my="0">
+                    <NewIpAddress ExistingConnections="ViewModel.IpAddresses" AddNewAddressClicked="@ViewModel.AddNewIpAddress" />
                 </MudItem>
             </MudGrid>
         </MudTabPanel>
